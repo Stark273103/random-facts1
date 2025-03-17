@@ -8,12 +8,13 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background: linear-gradient(to bottom right, #ff9a9e, #fad0c4);
+            background: url("bg.jpg") no-repeat center center fixed;
+            background-size: cover;
             overflow: hidden;
         }
 
         .fact-box {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.4);
             padding: 20px;
             margin: 50px auto;
             border-radius: 10px;
@@ -24,20 +25,21 @@
         }
 
         #fact-btn {
-            background: purple;
+            background: #6a0dad;
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 18px;
+            transition: background 0.3s;
         }
 
         #fact-btn:hover {
-            background: darkmagenta;
+            background: #4b0082;
         }
 
-        /* Анимация пузырей */
+        /* Фоновые анимации */
         #bubble-container {
             position: fixed;
             top: 0;
@@ -50,7 +52,7 @@
 
         .bubble {
             position: absolute;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             animation: float 10s linear infinite;
         }
@@ -81,7 +83,7 @@
 
     <button id="fact-btn">Показать факт</button>
 
-    <img id="sound-toggle" src="https://cdn-icons-png.flaticon.com/512/727/727269.png" alt="Sound Toggle">
+    <img id="sound-toggle" src="sound-on.png" alt="Sound Toggle">
 
     <script>
         const factBox = document.getElementById("fact");
@@ -91,13 +93,13 @@
         const userLang = navigator.language || navigator.userLanguage;
         const isRussian = userLang.startsWith("ru");
 
-        // Звуки
-        const clickAudio = new Audio("https://www.fesliyanstudios.com/play-mp3/4384");
-        clickAudio.volume = 0.1; // Уменьшаем громкость
+        // Подключение звуков
+        const clickAudio = new Audio("button-click.mp3"); // Укажите путь к своему звуку кнопки
+        clickAudio.volume = 0.1;
 
-        const bgMusic = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
+        const bgMusic = new Audio("background-music.mp3"); // Укажите путь к своей фоновой музыке
         bgMusic.loop = true;
-        bgMusic.volume = 0.05; // Тихая музыка
+        bgMusic.volume = 0.05;
         let soundEnabled = true;
 
         // Включение/выключение звука
@@ -105,9 +107,7 @@
             soundEnabled = !soundEnabled;
             bgMusic.muted = !soundEnabled;
             clickAudio.muted = !soundEnabled;
-            soundToggle.src = soundEnabled 
-                ? "https://cdn-icons-png.flaticon.com/512/727/727269.png" 
-                : "https://cdn-icons-png.flaticon.com/512/1828/1828778.png";
+            soundToggle.src = soundEnabled ? "sound-on.png" : "sound-off.png";
         });
 
         async function loadFact() {

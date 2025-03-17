@@ -31,6 +31,12 @@
             background: rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             opacity: 0.6;
+            animation: floatUp 5s infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0.3; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
         }
 
         .container {
@@ -60,11 +66,31 @@
     <div class="container">
         <p id="fact">Нажмите кнопку, чтобы увидеть факт</p>
         <button id="factButton">Показать факт</button>
+        <button id="soundToggle">🔊</button>
     </div>
+
+    <audio id="buttonSound" src="audio/click.mp3"></audio>
+    <audio id="backgroundMusic" src="audio/background.mp3" loop></audio>
 
     <script>
         const factText = document.getElementById("fact");
         const factButton = document.getElementById("factButton");
+        const soundToggle = document.getElementById("soundToggle");
+        const buttonSound = document.getElementById("buttonSound");
+        const backgroundMusic = document.getElementById("backgroundMusic");
+
+        let isSoundOn = true;
+        backgroundMusic.play();
+
+        soundToggle.addEventListener("click", () => {
+            isSoundOn = !isSoundOn;
+            soundToggle.textContent = isSoundOn ? "🔊" : "🔇";
+            if (isSoundOn) {
+                backgroundMusic.play();
+            } else {
+                backgroundMusic.pause();
+            }
+        });
 
         let shownFacts = new Set();
         let language = navigator.language.startsWith("ru") ? "ru" : "en";
@@ -77,15 +103,16 @@
         factButton.textContent = buttonText[language];
 
         async function getFact() {
+            if (isSoundOn) buttonSound.play();
             let fact;
             do {
                 let response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
                 let data = await response.json();
                 fact = data.text;
-            } while (shownFacts.has(fact)); // Проверяем, был ли этот факт уже показан
+            } while (shownFacts.has(fact));
 
             shownFacts.add(fact);
-            if (shownFacts.size > 10) shownFacts.clear(); // Сбрасываем после 10 фактов
+            if (shownFacts.size > 10) shownFacts.clear();
 
             if (language === "ru") {
                 fact = await translateFact(fact);
@@ -111,7 +138,7 @@
                 bubble.style.width = size + "px";
                 bubble.style.height = size + "px";
                 bubble.style.left = Math.random() * 100 + "%";
-                bubble.style.top = Math.random() * 100 + "%";
+                bubble.style.animationDuration = Math.random() * 3 + 3 + "s";
                 bubblesContainer.appendChild(bubble);
             }
         }

@@ -1,16 +1,161 @@
-function generateBubbles() {
-    setInterval(() => {
-        let bubble = document.createElement("div");
-        bubble.classList.add("bubble");
-        let size = Math.random() * 60 + 20;
-        bubble.style.width = `${size}px`;
-        bubble.style.height = `${size}px`;
-        bubble.style.left = `${Math.random() * 100}vw`;
-        bubble.style.animationDuration = `${Math.random() * 5 + 5}s`;
-        
-        document.body.appendChild(bubble);
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Случайные факты</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
 
-        // Удаляем пузырь через 10 секунд, чтобы не засорять страницу
-        setTimeout(() => bubble.remove(), 10000);
-    }, 500); // Каждые 500 мс создается новый пузырь
-}
+        #fact-box {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 20px;
+            color: white;
+            text-align: center;
+            width: 60%;
+            margin-bottom: 20px;
+        }
+
+        #fact-btn {
+            background: purple;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        #fact-btn:active {
+            transform: scale(0.95);
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: floatUp 8s linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh);
+                opacity: 0;
+            }
+        }
+
+        #sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 24px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="fact-box">Нажмите кнопку, чтобы увидеть интересный факт!</div>
+    <button id="fact-btn">Показать факт</button>
+    <span id="sound-toggle">🔊</span>
+
+    <audio id="ambient-audio" loop>
+        <source src="audio/ambient.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="click-audio">
+        <source src="audio/bubble-click.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const factBox = document.getElementById("fact-box");
+        const factBtn = document.getElementById("fact-btn");
+        const soundToggle = document.getElementById("sound-toggle");
+        const ambientAudio = document.getElementById("ambient-audio");
+        const clickAudio = document.getElementById("click-audio");
+
+        // 🏳️ Определяем язык браузера
+        const userLang = navigator.language || navigator.userLanguage;
+        const isRussian = userLang.startsWith("ru");
+        const factApiUrl = isRussian
+            ? "https://randstuff.ru/fact/"
+            : "https://uselessfacts.jsph.pl/random.json?language=en";
+
+        factBtn.innerText = isRussian ? "Показать факт" : "Show Fact";
+
+        // 🎵 Запускаем фоновую музыку
+        ambientAudio.volume = 0.2;
+        ambientAudio.play().catch(() => console.log("Автовоспроизведение заблокировано браузером"));
+
+        // 🔊 Переключение звука
+        let soundEnabled = true;
+        soundToggle.addEventListener("click", () => {
+            soundEnabled = !soundEnabled;
+            if (soundEnabled) {
+                soundToggle.innerText = "🔊";
+                ambientAudio.play();
+            } else {
+                soundToggle.innerText = "🔇";
+                ambientAudio.pause();
+            }
+        });
+
+        // 📌 Функция загрузки фактов
+        async function loadFact() {
+            if (soundEnabled) clickAudio.play(); // Звук кнопки
+
+            try {
+                const response = await fetch(factApiUrl);
+                const data = await response.json();
+
+                if (isRussian) {
+                    factBox.innerHTML = data.fact;
+                } else {
+                    factBox.innerHTML = data.text;
+                }
+            } catch (error) {
+                factBox.innerHTML = isRussian ? "Ошибка загрузки факта!" : "Failed to load fact!";
+            }
+        }
+
+        factBtn.addEventListener("click", loadFact);
+
+        // 🫧 Бесконечная генерация пузырьков
+        function generateBubbles() {
+            setInterval(() => {
+                let bubble = document.createElement("div");
+                bubble.classList.add("bubble");
+
+                let size = Math.random() * 60 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.animationDuration = `${Math.random() * 5 + 5}s`;
+
+                document.body.appendChild(bubble);
+
+                setTimeout(() => bubble.remove(), 10000); // Удаление пузырьков
+            }, 500);
+        }
+
+        generateBubbles(); // Запуск пузырьков
+    </script>
+
+</body>
+</html>

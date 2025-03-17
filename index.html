@@ -8,163 +8,105 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background: url("bg.jpg") no-repeat center center fixed;
+            background: url('images/background.jpg') no-repeat center center fixed;
             background-size: cover;
-            overflow: hidden;
+            color: white;
+            margin: 0;
         }
 
-        .fact-box {
-            background: rgba(0, 0, 0, 0.4);
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #fact-box {
+            background: rgba(255, 255, 255, 0.2);
             padding: 20px;
-            margin: 50px auto;
             border-radius: 10px;
-            width: 60%;
-            color: white;
+            max-width: 600px;
             font-size: 20px;
-            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
         }
 
-        #fact-btn {
-            background: #6a0dad;
+        #fact-button {
+            background: purple;
             color: white;
-            padding: 10px 20px;
             border: none;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 18px;
-            transition: background 0.3s;
         }
 
-        #fact-btn:hover {
-            background: #4b0082;
+        #fact-button:hover {
+            background: darkmagenta;
         }
 
-        /* Фоновые анимации */
-        #bubble-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .bubble {
+        .mute {
             position: absolute;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            animation: float 10s linear infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(100vh); opacity: 1; }
-            100% { transform: translateY(-10vh); opacity: 0; }
-        }
-
-        /* Кнопка звука */
-        #sound-toggle {
-            position: fixed;
             top: 20px;
             right: 20px;
             width: 40px;
             height: 40px;
+            background: url('icons/sound-on.png') no-repeat center;
+            background-size: contain;
+            border: none;
             cursor: pointer;
+        }
+
+        .mute.muted {
+            background: url('icons/sound-off.png') no-repeat center;
+            background-size: contain;
         }
     </style>
 </head>
 <body>
-
-    <div id="bubble-container"></div>
-
-    <div class="fact-box">
-        <p id="fact">Загрузка факта...</p>
+    <div class="container">
+        <div id="fact-box">Здесь будет интересный факт...</div>
+        <button id="fact-button">Показать факт</button>
+        <button id="mute-button" class="mute"></button>
     </div>
 
-    <button id="fact-btn">Показать факт</button>
-
-    <img id="sound-toggle" src="sound-on.png" alt="Sound Toggle">
-
     <script>
-        const factBox = document.getElementById("fact");
-        const factButton = document.getElementById("fact-btn");
-        const soundToggle = document.getElementById("sound-toggle");
+        document.addEventListener('DOMContentLoaded', function () {
+            const factBox = document.getElementById('fact-box');
+            const factButton = document.getElementById('fact-button');
+            const muteButton = document.getElementById('mute-button');
 
-        const userLang = navigator.language || navigator.userLanguage;
-        const isRussian = userLang.startsWith("ru");
+            const buttonClickSound = new Audio('sounds/button-click.mp3'); 
+            const backgroundMusic = new Audio('sounds/background.mp3');
+            backgroundMusic.loop = true;
+            backgroundMusic.volume = 0.3;
+            backgroundMusic.play();
 
-        // Подключение звуков
-        const clickAudio = new Audio("button-click.mp3"); // Укажите путь к своему звуку кнопки
-        clickAudio.volume = 0.1;
+            let isMuted = false;
 
-        const bgMusic = new Audio("background-music.mp3"); // Укажите путь к своей фоновой музыке
-        bgMusic.loop = true;
-        bgMusic.volume = 0.05;
-        let soundEnabled = true;
-
-        // Включение/выключение звука
-        soundToggle.addEventListener("click", () => {
-            soundEnabled = !soundEnabled;
-            bgMusic.muted = !soundEnabled;
-            clickAudio.muted = !soundEnabled;
-            soundToggle.src = soundEnabled ? "sound-on.png" : "sound-off.png";
-        });
-
-        async function loadFact() {
-            if (soundEnabled) clickAudio.play();
-
-            try {
-                const response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
-                const data = await response.json();
-                let factText = data.text;
-
-                if (isRussian) {
-                    factText = await translateText(factText);
+            muteButton.addEventListener('click', () => {
+                isMuted = !isMuted;
+                if (isMuted) {
+                    backgroundMusic.pause();
+                    muteButton.classList.add('muted');
+                } else {
+                    backgroundMusic.play();
+                    muteButton.classList.remove('muted');
                 }
+            });
 
-                factBox.innerHTML = factText;
-            } catch (error) {
-                factBox.innerHTML = isRussian ? "Ошибка загрузки факта!" : "Error loading fact!";
-                console.error("Ошибка загрузки:", error);
-            }
-        }
-
-        async function translateText(text) {
-            try {
-                const response = await fetch("https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=en|ru");
-                const data = await response.json();
-                return data.responseData.translatedText || text;
-            } catch (error) {
-                console.error("Ошибка перевода:", error);
-                return text;
-            }
-        }
-
-        window.onload = () => {
-            if (soundEnabled) bgMusic.play();
-            generateBubbles();
-        };
-
-        loadFact();
-        factButton.addEventListener("click", loadFact);
-
-        function generateBubbles() {
-            setInterval(() => {
-                let bubble = document.createElement("div");
-                bubble.classList.add("bubble");
-                
-                let size = Math.random() * 60 + 20;
-                bubble.style.width = `${size}px`;
-                bubble.style.height = `${size}px`;
-                bubble.style.left = `${Math.random() * 100}vw`;
-                bubble.style.animationDuration = `${Math.random() * 5 + 5}s`;
-                
-                document.getElementById("bubble-container").appendChild(bubble);
-
-                setTimeout(() => bubble.remove(), 10000);
-            }, 500);
-        }
+            factButton.addEventListener('click', () => {
+                if (!isMuted) buttonClickSound.play();
+                fetch('https://uselessfacts.jsph.pl/random.json?language=ru')
+                    .then(response => response.json())
+                    .then(data => {
+                        factBox.textContent = data.text;
+                    })
+                    .catch(() => {
+                        factBox.textContent = 'Ошибка загрузки факта!';
+                    });
+            });
+        });
     </script>
-
 </body>
 </html>

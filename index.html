@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +16,7 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            position: relative;
         }
         #fact-box {
             font-size: 24px;
@@ -39,6 +40,21 @@
         button:hover {
             background: #2575fc;
         }
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: float 10s infinite linear;
+        }
+        @keyframes float {
+            from {
+                transform: translateY(100vh) scale(0.5);
+            }
+            to {
+                transform: translateY(-10vh) scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -46,17 +62,15 @@
     <div id="fact-box">Нажмите на кнопку, чтобы увидеть интересный факт!</div>
     <button onclick="showFact()">Показать факт</button>
 
-    <audio id="click-sound" src="https://www.fesliyanstudios.com/play-mp3/4387"></audio>
+    <audio id="click-sound" src="https://www.fesliyanstudios.com/play-mp3/4385"></audio> 
     <audio id="ambient-music" src="https://www.fesliyanstudios.com/play-mp3/387" loop autoplay></audio>
 
     <script>
-        // Определение языка пользователя
         function detectLanguage() {
             let userLang = navigator.language || navigator.userLanguage;
             return userLang.startsWith("ru") ? "ru" : "en"; 
         }
 
-        // Функция для загрузки факта
         async function showFact() {
             let language = detectLanguage(); 
             const response = await fetch(`https://uselessfacts.jsph.pl/random.json?language=${language}`);
@@ -65,17 +79,31 @@
             playClickSound();
         }
 
-        // Функция для воспроизведения звука кнопки
         function playClickSound() {
             let sound = document.getElementById("click-sound");
+            sound.volume = 0.3;
             sound.play();
         }
 
-        // Автовоспроизведение эмбиент-музыки
         window.onload = function() {
             let music = document.getElementById("ambient-music");
-            music.volume = 0.5; // Громкость 50%
+            music.volume = 0.5;
             music.play();
+            generateBubbles();
+        }
+
+        function generateBubbles() {
+            for (let i = 0; i < 20; i++) {
+                let bubble = document.createElement("div");
+                bubble.classList.add("bubble");
+                let size = Math.random() * 60 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                document.body.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 10000);
+            }
         }
     </script>
 

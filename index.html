@@ -28,10 +28,10 @@
 
         .bubble {
             position: absolute;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.4); /* Увеличил прозрачность */
             border-radius: 50%;
-            opacity: 0.6;
-            animation: floatUp 10s infinite;
+            opacity: 0.8; /* Сделал пузыри более заметными */
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.9); /* Добавил эффект свечения */
         }
 
         @keyframes floatUp {
@@ -115,6 +115,7 @@
             en: "Show Fact"
         };
 
+        factText.textContent = language === "ru" ? "Нажмите кнопку, чтобы увидеть факт" : "Click the button to see a fact";
         factButton.textContent = buttonText[language];
 
         async function getFact() {

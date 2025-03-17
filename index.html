@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Случайный факт дня</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background: linear-gradient(120deg, #ff9a9e, #fad0c4);
+            color: white;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 32px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #fact-box {
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            margin: 20px;
+            backdrop-filter: blur(10px);
+            transition: 0.5s;
+        }
+
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            background: #ff758c;
+            border: none;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: #ff5f6d;
+            transform: scale(1.1);
+        }
+
+        /* Анимированные круги в фоне */
+        .circle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: move 10s linear infinite;
+        }
+
+        @keyframes move {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(-100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Случайный факт дня</h1>
+    <div id="fact-box">Нажмите на кнопку, чтобы увидеть интересный факт!</div>
+    <button onclick="showFact()">Показать факт</button>
+
+    <script>
+        const facts = [
+            "Пчёлы могут узнавать лица людей.",
+            "Улитки могут спать до трёх лет подряд.",
+            "В космосе есть гигантский облако спирта.",
+            "Фламинго рождаются серыми, а не розовыми.",
+            "Сердце синего кита весит около 600 кг!",
+            "В Японии есть кафе с ежами, которых можно гладить.",
+            "Самая старая найденная бутылка с посланием – 108 лет."
+        ];
+
+        function showFact() {
+            let randomIndex = Math.floor(Math.random() * facts.length);
+            document.getElementById("fact-box").innerHTML = facts[randomIndex];
+        }
+
+        // Генерация анимационных кругов на фоне
+        function createCircles() {
+            for (let i = 0; i < 10; i++) {
+                let circle = document.createElement("div");
+                circle.classList.add("circle");
+                let size = Math.random() * 100 + 30;
+                circle.style.width = `${size}px`;
+                circle.style.height = `${size}px`;
+                circle.style.left = `${Math.random() * 100}vw`;
+                circle.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                document.body.appendChild(circle);
+            }
+        }
+
+        createCircles();
+    </script>
+</body>
+</html>

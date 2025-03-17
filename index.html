@@ -6,160 +6,160 @@
     <title>Случайные факты</title>
     <style>
         body {
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            overflow: hidden;
             font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom right, #ff9a9e, #fad0c4);
+            overflow: hidden;
         }
 
-        #fact-box {
-            background: rgba(255, 255, 255, 0.3);
+        .fact-box {
+            background: rgba(255, 255, 255, 0.2);
             padding: 20px;
+            margin: 50px auto;
             border-radius: 10px;
-            font-size: 20px;
-            color: white;
-            text-align: center;
             width: 60%;
-            margin-bottom: 20px;
+            color: white;
+            font-size: 20px;
+            backdrop-filter: blur(10px);
         }
 
         #fact-btn {
             background: purple;
             color: white;
-            border: none;
             padding: 10px 20px;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 18px;
         }
 
-        #fact-btn:active {
-            transform: scale(0.95);
+        #fact-btn:hover {
+            background: darkmagenta;
+        }
+
+        /* Анимация пузырей */
+        #bubble-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
         }
 
         .bubble {
             position: absolute;
-            bottom: -50px;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            animation: floatUp 8s linear infinite;
+            animation: float 10s linear infinite;
         }
 
-        @keyframes floatUp {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh);
-                opacity: 0;
-            }
+        @keyframes float {
+            0% { transform: translateY(100vh); opacity: 1; }
+            100% { transform: translateY(-10vh); opacity: 0; }
         }
 
+        /* Кнопка звука */
         #sound-toggle {
-            position: absolute;
+            position: fixed;
             top: 20px;
             right: 20px;
+            width: 40px;
+            height: 40px;
             cursor: pointer;
-            font-size: 24px;
-            color: white;
         }
     </style>
 </head>
 <body>
 
-    <div id="fact-box">Нажмите кнопку, чтобы увидеть интересный факт!</div>
-    <button id="fact-btn">Показать факт</button>
-    <span id="sound-toggle">🔊</span>
+    <div id="bubble-container"></div>
 
-    <audio id="ambient-audio" loop>
-        <source src="audio/ambient.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="click-audio">
-        <source src="audio/bubble-click.mp3" type="audio/mpeg">
-    </audio>
+    <div class="fact-box">
+        <p id="fact">Загрузка факта...</p>
+    </div>
+
+    <button id="fact-btn">Показать факт</button>
+
+    <img id="sound-toggle" src="https://cdn-icons-png.flaticon.com/512/64/64576.png" alt="Sound Toggle">
 
     <script>
-        const factBox = document.getElementById("fact-box");
-        const factBtn = document.getElementById("fact-btn");
+        const factBox = document.getElementById("fact");
+        const factButton = document.getElementById("fact-btn");
         const soundToggle = document.getElementById("sound-toggle");
-        const ambientAudio = document.getElementById("ambient-audio");
-        const clickAudio = document.getElementById("click-audio");
 
-        // 🏳️ Определяем язык браузера
         const userLang = navigator.language || navigator.userLanguage;
         const isRussian = userLang.startsWith("ru");
-        const factApiUrl = isRussian
-            ? "https://randstuff.ru/fact/"
-            : "https://uselessfacts.jsph.pl/random.json?language=en";
 
-        factBtn.innerText = isRussian ? "Показать факт" : "Show Fact";
-
-        // 🎵 Запускаем фоновую музыку
-        ambientAudio.volume = 0.2;
-        ambientAudio.play().catch(() => console.log("Автовоспроизведение заблокировано браузером"));
-
-        // 🔊 Переключение звука
+        // Звуки
+        const clickAudio = new Audio("https://www.fesliyanstudios.com/play-mp3/4384");
+        const bgMusic = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
+        bgMusic.loop = true;
         let soundEnabled = true;
+
+        // Включение/выключение звука
         soundToggle.addEventListener("click", () => {
             soundEnabled = !soundEnabled;
-            if (soundEnabled) {
-                soundToggle.innerText = "🔊";
-                ambientAudio.play();
-            } else {
-                soundToggle.innerText = "🔇";
-                ambientAudio.pause();
-            }
+            bgMusic.muted = !soundEnabled;
+            soundToggle.src = soundEnabled 
+                ? "https://cdn-icons-png.flaticon.com/512/64/64576.png" 
+                : "https://cdn-icons-png.flaticon.com/512/64/64581.png";
         });
 
-        // 📌 Функция загрузки фактов
-async function loadFact() {
-    if (soundEnabled) clickAudio.play(); // Звук кнопки
+        async function loadFact() {
+            if (soundEnabled) clickAudio.play();
 
-    try {
-        let response;
-        if (isRussian) {
-            response = await fetch("https://randstuff.ru/fact/", { mode: "no-cors" });
-            factBox.innerHTML = "Факт загружается..."; // Добавим временный текст
-            setTimeout(() => {
-                factBox.innerHTML = "Извините, но загрузка русских фактов временно недоступна.";
-            }, 2000);
-        } else {
-            response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
-            const data = await response.json();
-            factBox.innerHTML = data.text;
+            try {
+                const response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
+                const data = await response.json();
+                let factText = data.text;
+
+                if (isRussian) {
+                    factText = await translateText(factText);
+                }
+
+                factBox.innerHTML = factText;
+            } catch (error) {
+                factBox.innerHTML = isRussian ? "Ошибка загрузки факта!" : "Error loading fact!";
+                console.error("Ошибка загрузки:", error);
+            }
         }
-    } catch (error) {
-        factBox.innerHTML = "Ошибка загрузки факта!";
-        console.error("Ошибка загрузки:", error);
-    }
-}
 
-        factBtn.addEventListener("click", loadFact);
+        async function translateText(text) {
+            try {
+                const response = await fetch("https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=en|ru");
+                const data = await response.json();
+                return data.responseData.translatedText || text;
+            } catch (error) {
+                console.error("Ошибка перевода:", error);
+                return text;
+            }
+        }
 
-        // 🫧 Бесконечная генерация пузырьков
+        window.onload = () => {
+            if (soundEnabled) bgMusic.play();
+            generateBubbles();
+        };
+
+        loadFact();
+        factButton.addEventListener("click", loadFact);
+
         function generateBubbles() {
             setInterval(() => {
                 let bubble = document.createElement("div");
                 bubble.classList.add("bubble");
-
+                
                 let size = Math.random() * 60 + 20;
                 bubble.style.width = `${size}px`;
                 bubble.style.height = `${size}px`;
                 bubble.style.left = `${Math.random() * 100}vw`;
                 bubble.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                
+                document.getElementById("bubble-container").appendChild(bubble);
 
-                document.body.appendChild(bubble);
-
-                setTimeout(() => bubble.remove(), 10000); // Удаление пузырьков
+                setTimeout(() => bubble.remove(), 10000);
             }, 500);
         }
-
-        generateBubbles(); // Запуск пузырьков
     </script>
 
 </body>

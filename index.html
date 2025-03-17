@@ -81,7 +81,7 @@
 
     <button id="fact-btn">Показать факт</button>
 
-    <img id="sound-toggle" src="https://cdn-icons-png.flaticon.com/512/64/64576.png" alt="Sound Toggle">
+    <img id="sound-toggle" src="https://cdn-icons-png.flaticon.com/512/727/727269.png" alt="Sound Toggle">
 
     <script>
         const factBox = document.getElementById("fact");
@@ -93,17 +93,21 @@
 
         // Звуки
         const clickAudio = new Audio("https://www.fesliyanstudios.com/play-mp3/4384");
+        clickAudio.volume = 0.1; // Уменьшаем громкость
+
         const bgMusic = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
         bgMusic.loop = true;
+        bgMusic.volume = 0.05; // Тихая музыка
         let soundEnabled = true;
 
         // Включение/выключение звука
         soundToggle.addEventListener("click", () => {
             soundEnabled = !soundEnabled;
             bgMusic.muted = !soundEnabled;
+            clickAudio.muted = !soundEnabled;
             soundToggle.src = soundEnabled 
-                ? "https://cdn-icons-png.flaticon.com/512/64/64576.png" 
-                : "https://cdn-icons-png.flaticon.com/512/64/64581.png";
+                ? "https://cdn-icons-png.flaticon.com/512/727/727269.png" 
+                : "https://cdn-icons-png.flaticon.com/512/1828/1828778.png";
         });
 
         async function loadFact() {

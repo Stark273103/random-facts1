@@ -1,19 +1,15 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Случайный факт дня</title>
+    <title>Случайный факт</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: Arial, sans-serif;
             text-align: center;
-            background: linear-gradient(120deg, #ff9a9e, #fad0c4);
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
             color: white;
-            margin: 0;
-            padding: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -21,92 +17,67 @@
             align-items: center;
             overflow: hidden;
         }
-
-        h1 {
-            font-size: 32px;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
         #fact-box {
             font-size: 24px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-            max-width: 600px;
             margin: 20px;
-            backdrop-filter: blur(10px);
-            transition: 0.5s;
-        }
-
-        button {
-            font-size: 20px;
-            padding: 10px 20px;
-            background: #ff758c;
-            border: none;
-            color: white;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        button:hover {
-            background: #ff5f6d;
-            transform: scale(1.1);
-        }
-
-        /* Анимированные круги в фоне */
-        .circle {
-            position: absolute;
+            padding: 20px;
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            animation: move 10s linear infinite;
+            border-radius: 10px;
+            width: 60%;
+            min-height: 100px;
         }
-
-        @keyframes move {
-            from {
-                transform: translateY(0);
-            }
-            to {
-                transform: translateY(-100vh);
-            }
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            background: #6a11cb;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #2575fc;
         }
     </style>
 </head>
 <body>
-    <h1>Случайный факт дня</h1>
+
     <div id="fact-box">Нажмите на кнопку, чтобы увидеть интересный факт!</div>
     <button onclick="showFact()">Показать факт</button>
 
+    <audio id="click-sound" src="https://www.fesliyanstudios.com/play-mp3/4387"></audio>
+    <audio id="ambient-music" src="https://www.fesliyanstudios.com/play-mp3/387" loop autoplay></audio>
+
     <script>
-    async function fetchFact() {
-    const response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
-    const data = await response.json();
-    document.getElementById("fact-box").innerText = data.text;
-}
-    }
-
-        function showFact() {
-            let randomIndex = Math.floor(Math.random() * facts.length);
-            document.getElementById("fact-box").innerHTML = facts[randomIndex];
+        // Определение языка пользователя
+        function detectLanguage() {
+            let userLang = navigator.language || navigator.userLanguage;
+            return userLang.startsWith("ru") ? "ru" : "en"; 
         }
 
-        // Генерация анимационных кругов на фоне
-        function createCircles() {
-            for (let i = 0; i < 10; i++) {
-                let circle = document.createElement("div");
-                circle.classList.add("circle");
-                let size = Math.random() * 100 + 30;
-                circle.style.width = `${size}px`;
-                circle.style.height = `${size}px`;
-                circle.style.left = `${Math.random() * 100}vw`;
-                circle.style.animationDuration = `${Math.random() * 5 + 5}s`;
-                document.body.appendChild(circle);
-            }
+        // Функция для загрузки факта
+        async function showFact() {
+            let language = detectLanguage(); 
+            const response = await fetch(`https://uselessfacts.jsph.pl/random.json?language=${language}`);
+            const data = await response.json();
+            document.getElementById("fact-box").innerText = data.text;
+            playClickSound();
         }
 
-        createCircles();
+        // Функция для воспроизведения звука кнопки
+        function playClickSound() {
+            let sound = document.getElementById("click-sound");
+            sound.play();
+        }
+
+        // Автовоспроизведение эмбиент-музыки
+        window.onload = function() {
+            let music = document.getElementById("ambient-music");
+            music.volume = 0.5; // Громкость 50%
+            music.play();
+        }
     </script>
+
 </body>
 </html>

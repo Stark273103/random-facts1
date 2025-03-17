@@ -117,22 +117,27 @@
         });
 
         // 📌 Функция загрузки фактов
-        async function loadFact() {
-            if (soundEnabled) clickAudio.play(); // Звук кнопки
+async function loadFact() {
+    if (soundEnabled) clickAudio.play(); // Звук кнопки
 
-            try {
-                const response = await fetch(factApiUrl);
-                const data = await response.json();
-
-                if (isRussian) {
-                    factBox.innerHTML = data.fact;
-                } else {
-                    factBox.innerHTML = data.text;
-                }
-            } catch (error) {
-                factBox.innerHTML = isRussian ? "Ошибка загрузки факта!" : "Failed to load fact!";
-            }
+    try {
+        let response;
+        if (isRussian) {
+            response = await fetch("https://randstuff.ru/fact/", { mode: "no-cors" });
+            factBox.innerHTML = "Факт загружается..."; // Добавим временный текст
+            setTimeout(() => {
+                factBox.innerHTML = "Извините, но загрузка русских фактов временно недоступна.";
+            }, 2000);
+        } else {
+            response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
+            const data = await response.json();
+            factBox.innerHTML = data.text;
         }
+    } catch (error) {
+        factBox.innerHTML = "Ошибка загрузки факта!";
+        console.error("Ошибка загрузки:", error);
+    }
+}
 
         factBtn.addEventListener("click", loadFact);
 

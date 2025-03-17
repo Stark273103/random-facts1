@@ -15,6 +15,30 @@
             align-items: center;
             flex-direction: column;
             margin: 0;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 10s infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
         }
 
         .container {
@@ -63,6 +87,18 @@
     </style>
 </head>
 <body>
+    <!-- Пузыри -->
+    <script>
+        for (let i = 0; i < 15; i++) {
+            let bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.style.left = Math.random() * 100 + 'vw';
+            bubble.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            bubble.style.width = bubble.style.height = (Math.random() * 40 + 20) + 'px';
+            document.body.appendChild(bubble);
+        }
+    </script>
+
     <div class="container">
         <div id="fact-box">Здесь будет интересный факт...</div>
         <button id="fact-button">Показать факт</button>
@@ -96,15 +132,36 @@
 
             factButton.addEventListener('click', () => {
                 if (!isMuted) buttonClickSound.play();
-                fetch('https://uselessfacts.jsph.pl/random.json?language=ru')
+                fetch('https://uselessfacts.jsph.pl/random.json?language=en')
                     .then(response => response.json())
                     .then(data => {
-                        factBox.textContent = data.text;
+                        translateFact(data.text);
                     })
                     .catch(() => {
                         factBox.textContent = 'Ошибка загрузки факта!';
                     });
             });
+
+            function translateFact(fact) {
+                fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(fact)}&langpair=en|ru`)
+                    .then(response => response.json())
+                    .then(data => {
+                        factBox.textContent = data.responseData.translatedText;
+                        updateButtonText(fact);
+                    })
+                    .catch(() => {
+                        factBox.textContent = fact + " (не удалось перевести)";
+                    });
+            }
+
+            function updateButtonText(fact) {
+                const englishWords = fact.split(' ');
+                if (englishWords.length > 0) {
+                    factButton.textContent = "Show Fact";
+                } else {
+                    factButton.textContent = "Показать факт";
+                }
+            }
         });
     </script>
 </body>

@@ -80,10 +80,11 @@
     <button onclick="showFact()">Показать факт</button>
 
     <script>
-    async function showFact() {
-        const response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
-        const data = await response.json();
-        document.getElementById("fact-box").innerText = data.text;
+    async function fetchFact() {
+    const response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
+    const data = await response.json();
+    document.getElementById("fact-box").innerText = data.text;
+}
     }
 
         function showFact() {

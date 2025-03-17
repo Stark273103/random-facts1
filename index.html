@@ -80,15 +80,11 @@
     <button onclick="showFact()">Показать факт</button>
 
     <script>
-        const facts = [
-            "Пчёлы могут узнавать лица людей.",
-            "Улитки могут спать до трёх лет подряд.",
-            "В космосе есть гигантский облако спирта.",
-            "Фламинго рождаются серыми, а не розовыми.",
-            "Сердце синего кита весит около 600 кг!",
-            "В Японии есть кафе с ежами, которых можно гладить.",
-            "Самая старая найденная бутылка с посланием – 108 лет."
-        ];
+    async function showFact() {
+        const response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
+        const data = await response.json();
+        document.getElementById("fact-box").innerText = data.text;
+    }
 
         function showFact() {
             let randomIndex = Math.floor(Math.random() * facts.length);

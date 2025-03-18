@@ -28,10 +28,10 @@
 
         .bubble {
             position: absolute;
-            background: rgba(255, 255, 255, 0.7); /* Увеличил прозрачность */
+            background: rgba(255, 255, 255, 0.7);
             border-radius: 50%;
-            opacity: 0.8; /* Сделал пузыри более заметными */
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.9); /* Добавил эффект свечения */
+            opacity: 0.8;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
             animation: floatUp 8s infinite linear;
         }
 
@@ -40,10 +40,16 @@
             100% { transform: translateY(-10vh) scale(1); opacity: 0; }
         }
 
-        .sound-toggle {
+        .sound-controls {
             position: absolute;
             top: 10px;
             right: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sound-toggle, .volume-slider {
             background: purple;
             color: white;
             border: none;
@@ -51,7 +57,13 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 16px;
-            z-index: 2;
+        }
+
+        .volume-slider {
+            width: 100px;
+            cursor: pointer;
+            border-radius: 5px;
+            background: white;
         }
 
         .container {
@@ -78,7 +90,10 @@
 <body>
     <div class="bubbles"></div>
     
-    <button id="soundToggle" class="sound-toggle">🔊</button>
+    <div class="sound-controls">
+        <button id="soundToggle" class="sound-toggle">🔊</button>
+        <input id="volumeControl" class="volume-slider" type="range" min="0" max="1" step="0.1" value="1">
+    </div>
     
     <div class="container">
         <p id="fact">Нажмите кнопку, чтобы увидеть факт</p>
@@ -86,62 +101,37 @@
     </div>
 
     <audio id="buttonSound" src="audio/click.mp3"></audio>
-    <audio id="backgroundMusic" src="audio/background.mp3" loop></audio>
+    <audio id="backgroundMusic" src="https://stream-relay-geo.ntslive.net/stream" loop></audio>
 
     <script>
         const factText = document.getElementById("fact");
         const factButton = document.getElementById("factButton");
         const soundToggle = document.getElementById("soundToggle");
+        const volumeControl = document.getElementById("volumeControl");
         const buttonSound = document.getElementById("buttonSound");
         const backgroundMusic = document.getElementById("backgroundMusic");
 
         let isSoundOn = true;
-        backgroundMusic.play();
+        backgroundMusic.play().catch(() => console.log("Автовоспроизведение заблокировано браузером"));
 
         soundToggle.addEventListener("click", () => {
             isSoundOn = !isSoundOn;
             soundToggle.textContent = isSoundOn ? "🔊" : "🔇";
-            if (isSoundOn) {
-                backgroundMusic.play();
-            } else {
-                backgroundMusic.pause();
-            }
+            backgroundMusic.muted = !isSoundOn;
+            buttonSound.muted = !isSoundOn;
         });
 
-        let shownFacts = new Set();
-        let language = navigator.language.startsWith("ru") ? "ru" : "en";
-        
-        const buttonText = {
-            ru: "Показать факт",
-            en: "Show Fact"
-        };
-
-        factText.textContent = language === "ru" ? "Нажмите кнопку, чтобы увидеть факт" : "Click the button to see a fact";
-        factButton.textContent = buttonText[language];
+        volumeControl.addEventListener("input", (event) => {
+            const volume = event.target.value;
+            backgroundMusic.volume = volume;
+            buttonSound.volume = volume;
+        });
 
         async function getFact() {
             if (isSoundOn) buttonSound.play();
-            let fact;
-            do {
-                let response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
-                let data = await response.json();
-                fact = data.text;
-            } while (shownFacts.has(fact));
-
-            shownFacts.add(fact);
-            if (shownFacts.size > 10) shownFacts.clear();
-
-            if (language === "ru") {
-                fact = await translateFact(fact);
-            }
-
-            factText.textContent = fact;
-        }
-
-        async function translateFact(text) {
-            let response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ru`);
+            let response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
             let data = await response.json();
-            return data.responseData.translatedText;
+            factText.textContent = data.text;
         }
 
         factButton.addEventListener("click", getFact);

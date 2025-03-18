@@ -40,10 +40,16 @@
             100% { transform: translateY(-10vh) scale(1); opacity: 0; }
         }
 
-        .sound-toggle {
+        .sound-controls {
             position: absolute;
             top: 10px;
             right: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sound-toggle {
             background: purple;
             color: white;
             border: none;
@@ -51,7 +57,6 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 16px;
-            z-index: 2;
         }
 
         .container {
@@ -74,36 +79,27 @@
             margin-top: 10px;
         }
 
-        /* Стили для радио-кнопки и ползунка громкости */
-        .radio-controls {
-            margin-top: 15px;
-        }
-
-        #radioVolume {
+        /* Ползунок громкости */
+        #volumeControl {
             width: 100px;
-            margin-left: 10px;
         }
     </style>
 </head>
 <body>
     <div class="bubbles"></div>
-    
-    <button id="soundToggle" class="sound-toggle">🔊</button>
+
+    <div class="sound-controls">
+        <button id="soundToggle" class="sound-toggle">🔊</button>
+        <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.5">
+    </div>
     
     <div class="container">
         <p id="fact">Нажмите кнопку, чтобы увидеть факт</p>
         <button id="factButton">Показать факт</button>
-
-        <!-- Блок управления радио -->
-        <div class="radio-controls">
-            <button id="radioButton">▶ Включить радио</button>
-            <input type="range" id="radioVolume" min="0" max="1" step="0.01" value="0.5">
-        </div>
     </div>
 
     <audio id="buttonSound" src="audio/click.mp3"></audio>
     <audio id="backgroundMusic" src="audio/background.mp3" loop></audio>
-    <audio id="ambientRadio" src="https://stream.sleepbot.com:8484/stream" preload="auto"></audio>
 
     <script>
         const factText = document.getElementById("fact");
@@ -111,9 +107,7 @@
         const soundToggle = document.getElementById("soundToggle");
         const buttonSound = document.getElementById("buttonSound");
         const backgroundMusic = document.getElementById("backgroundMusic");
-        const ambientRadio = document.getElementById("ambientRadio");
-        const radioButton = document.getElementById("radioButton");
-        const radioVolume = document.getElementById("radioVolume");
+        const volumeControl = document.getElementById("volumeControl");
 
         let isSoundOn = true;
         backgroundMusic.play();
@@ -126,6 +120,10 @@
             } else {
                 backgroundMusic.pause();
             }
+        });
+
+        volumeControl.addEventListener("input", () => {
+            backgroundMusic.volume = volumeControl.value;
         });
 
         let shownFacts = new Set();
@@ -181,23 +179,6 @@
         }
 
         createBubbles();
-
-        // Радио
-        ambientRadio.volume = 0.5;
-
-        radioButton.addEventListener("click", () => {
-            if (ambientRadio.paused) {
-                ambientRadio.play().catch(error => console.log("Автовоспроизведение заблокировано браузером", error));
-                radioButton.textContent = "⏸ Остановить радио";
-            } else {
-                ambientRadio.pause();
-                radioButton.textContent = "▶ Включить радио";
-            }
-        });
-
-        radioVolume.addEventListener("input", () => {
-            ambientRadio.volume = radioVolume.value;
-        });
     </script>
 </body>
 </html>

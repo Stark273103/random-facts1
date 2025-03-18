@@ -73,6 +73,16 @@
             font-size: 16px;
             margin-top: 10px;
         }
+
+        /* Стили для радио-кнопки и ползунка громкости */
+        .radio-controls {
+            margin-top: 15px;
+        }
+
+        #radioVolume {
+            width: 100px;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -83,15 +93,17 @@
     <div class="container">
         <p id="fact">Нажмите кнопку, чтобы увидеть факт</p>
         <button id="factButton">Показать факт</button>
+
+        <!-- Блок управления радио -->
+        <div class="radio-controls">
+            <button id="radioButton">▶ Включить радио</button>
+            <input type="range" id="radioVolume" min="0" max="1" step="0.01" value="0.5">
+        </div>
     </div>
 
     <audio id="buttonSound" src="audio/click.mp3"></audio>
     <audio id="backgroundMusic" src="audio/background.mp3" loop></audio>
-
-    <!-- Добавляем радио -->
     <audio id="ambientRadio" src="https://stream.sleepbot.com:8484/stream" preload="auto"></audio>
-
-    <button onclick="playRadio()">▶ Включить радио</button>
 
     <script>
         const factText = document.getElementById("fact");
@@ -99,6 +111,9 @@
         const soundToggle = document.getElementById("soundToggle");
         const buttonSound = document.getElementById("buttonSound");
         const backgroundMusic = document.getElementById("backgroundMusic");
+        const ambientRadio = document.getElementById("ambientRadio");
+        const radioButton = document.getElementById("radioButton");
+        const radioVolume = document.getElementById("radioVolume");
 
         let isSoundOn = true;
         backgroundMusic.play();
@@ -167,11 +182,22 @@
 
         createBubbles();
 
-        // Функция для запуска радио
-        function playRadio() {
-            let radio = document.getElementById("ambientRadio");
-            radio.play().catch(error => console.log("Автовоспроизведение заблокировано браузером", error));
-        }
+        // Радио
+        ambientRadio.volume = 0.5;
+
+        radioButton.addEventListener("click", () => {
+            if (ambientRadio.paused) {
+                ambientRadio.play().catch(error => console.log("Автовоспроизведение заблокировано браузером", error));
+                radioButton.textContent = "⏸ Остановить радио";
+            } else {
+                ambientRadio.pause();
+                radioButton.textContent = "▶ Включить радио";
+            }
+        });
+
+        radioVolume.addEventListener("input", () => {
+            ambientRadio.volume = radioVolume.value;
+        });
     </script>
 </body>
 </html>

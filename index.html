@@ -47,9 +47,10 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            z-index: 2;
         }
 
-        .sound-toggle, .volume-slider {
+        .sound-toggle, .volume-control {
             background: purple;
             color: white;
             border: none;
@@ -59,11 +60,10 @@
             font-size: 16px;
         }
 
-        .volume-slider {
-            width: 100px;
-            cursor: pointer;
-            border-radius: 5px;
-            background: white;
+        .volume-control {
+            width: 80px;
+            border-radius: 10px;
+            padding: 5px;
         }
 
         .container {
@@ -92,7 +92,7 @@
     
     <div class="sound-controls">
         <button id="soundToggle" class="sound-toggle">🔊</button>
-        <input id="volumeControl" class="volume-slider" type="range" min="0" max="1" step="0.1" value="1">
+        <input type="range" id="volumeControl" class="volume-control" min="0" max="1" step="0.1" value="1">
     </div>
     
     <div class="container">
@@ -112,33 +112,66 @@
         const backgroundMusic = document.getElementById("backgroundMusic");
 
         let isSoundOn = true;
-        backgroundMusic.play().catch(() => console.log("Автовоспроизведение заблокировано браузером"));
+        backgroundMusic.play().catch(() => console.log("Автозапуск заблокирован"));
 
         soundToggle.addEventListener("click", () => {
             isSoundOn = !isSoundOn;
             soundToggle.textContent = isSoundOn ? "🔊" : "🔇";
-            backgroundMusic.muted = !isSoundOn;
-            buttonSound.muted = !isSoundOn;
+            if (isSoundOn) {
+                backgroundMusic.play();
+            } else {
+                backgroundMusic.pause();
+                buttonSound.muted = true;
+            }
         });
 
         volumeControl.addEventListener("input", (event) => {
-            const volume = event.target.value;
+            let volume = event.target.value;
             backgroundMusic.volume = volume;
             buttonSound.volume = volume;
         });
 
+        let shownFacts = new Set();
+        let language = navigator.language.startsWith("ru") ? "ru" : "en";
+        
+        const buttonText = {
+            ru: "Показать факт",
+            en: "Show Fact"
+        };
+
+        factText.textContent = language === "ru" ? "Нажмите кнопку, чтобы увидеть факт" : "Click the button to see a fact";
+        factButton.textContent = buttonText[language];
+
         async function getFact() {
             if (isSoundOn) buttonSound.play();
-            let response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
+            let fact;
+            do {
+                let response = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
+                let data = await response.json();
+                fact = data.text;
+            } while (shownFacts.has(fact));
+
+            shownFacts.add(fact);
+            if (shownFacts.size > 10) shownFacts.clear();
+
+            if (language === "ru") {
+                fact = await translateFact(fact);
+            }
+
+            factText.textContent = fact;
+        }
+
+        async function translateFact(text) {
+            let response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ru`);
             let data = await response.json();
-            factText.textContent = data.text;
+            return data.responseData.translatedText;
         }
 
         factButton.addEventListener("click", getFact);
 
         function createBubbles() {
             const bubblesContainer = document.querySelector(".bubbles");
-            for (let i = 0; i < 20; i++) {
+            for (let i = 20; i--;) {
                 let bubble = document.createElement("div");
                 bubble.classList.add("bubble");
                 let size = Math.random() * 80 + 20;
